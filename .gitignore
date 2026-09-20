@@ -1,6 +1,11 @@
 venv/
+.venv/
 __pycache__/
+.pytest_cache/
 .env
 uploads/
 processed/
+output/
+tmp/
+structure.txt
 *.pyc

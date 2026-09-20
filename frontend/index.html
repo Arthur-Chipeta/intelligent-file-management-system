@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intelligent Digital Library | File Manager</title>
+    <link rel="stylesheet" href="style.css?v=7" />
+  </head>
+  <body>
+    <section class="auth-shell" id="authShell">
+      <div class="auth-panel">
+        <div class="auth-brand"><div class="brand-mark">I</div>Intelligent Digital Library</div>
+        <div class="auth-copy">
+          <span class="eyebrow">Your academic workspace</span>
+          <h1>Organise knowledge.<br />Find it faster.</h1>
+          <p>Upload, classify, and manage your learning resources from one secure library.</p>
+        </div>
+      </div>
+      <div class="auth-form-wrap">
+        <div class="auth-card">
+          <h2 id="authTitle">Welcome back</h2>
+          <p id="authSubtitle">Sign in to continue to your workspace.</p>
+          <div class="auth-tabs" role="tablist">
+            <button class="active" id="loginTab" type="button">Sign in</button>
+            <button id="registerTab" type="button">Create account</button>
+          </div>
+          <form id="authForm">
+            <div id="nameField" hidden>
+              <label class="form-label" for="authName">Full name</label>
+              <input class="form-input" id="authName" autocomplete="name" />
+            </div>
+            <label class="form-label" for="authEmail">Email address</label>
+            <input class="form-input" id="authEmail" type="email" autocomplete="email" required />
+            <label class="form-label" for="authPassword">Password</label>
+            <input class="form-input" id="authPassword" type="password" autocomplete="current-password" required />
+            <small class="password-hint" id="passwordHint" hidden>At least 8 characters with uppercase, lowercase, and a number.</small>
+            <div class="notice" id="authNotice" aria-live="polite"></div>
+            <button class="primary auth-submit" id="authSubmit" type="submit">Sign in</button>
+          </form>
+        </div>
+      </div>
+    </section>
+    <div class="app" id="dashboard" hidden>
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">I</div>
+          Intelligent Digital Library
+        </div>
+        <div class="workspace">Workspace<strong>Personal Files</strong></div>
+        <nav class="nav">
+          <button class="active" id="dashboardNav">
+            <span class="nav-icon">▦</span>Dashboard
+          </button>
+          <button id="libraryNav"><span class="nav-icon">▤</span>My Library</button>
+          <button><span class="nav-icon">◈</span>Categories</button>
+          <button><span class="nav-icon">◷</span>Recent activity</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="avatar" id="userAvatar">AC</div>
+          <div>
+            <strong id="sidebarUserName" style="color: #fff; font-size: 12px">Arthur Chipeta</strong
+            ><br /><button class="logout-button" id="logoutButton" type="button">Sign out</button>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <div>
+            <div class="breadcrumb" id="pageBreadcrumb">Workspace / Overview</div>
+            <h1 id="welcomeHeading">Good afternoon, Arthur</h1>
+          </div>
+          <div class="top-actions">
+            <button class="icon-btn" aria-label="Notifications">♢</button
+            ><button class="primary" id="openUpload">
+              <span>+</span> Add resource
+            </button>
+          </div>
+        </header>
+        <section class="stats dashboard-view">
+          <article class="stat">
+            <div class="stat-row">
+              <span>Total resources</span
+              ><span class="stat-icon blue-bg">▤</span>
+            </div>
+            <div class="stat-value" id="totalCount">24</div>
+            <div class="stat-detail">
+              <span class="up">↑ 12%</span> from last month
+            </div>
+          </article>
+          <article class="stat">
+            <div class="stat-row">
+              <span>Documents</span><span class="stat-icon purple-bg">▣</span>
+            </div>
+            <div class="stat-value">16</div>
+            <div class="stat-detail">PDFs and DOCX files</div>
+          </article>
+          <article class="stat">
+            <div class="stat-row">
+              <span>Web resources</span
+              ><span class="stat-icon green-bg">⌁</span>
+            </div>
+            <div class="stat-value">6</div>
+            <div class="stat-detail">Articles and references</div>
+          </article>
+          <article class="stat">
+            <div class="stat-row">
+              <span>Recently added</span
+              ><span class="stat-icon amber-bg">◷</span>
+            </div>
+            <div class="stat-value">4</div>
+            <div class="stat-detail">In the last 7 days</div>
+          </article>
+        </section>
+        <section class="dashboard-view">
+          <div class="section-head">
+            <div>
+              <h2>Browse by category</h2>
+              <p>Keep your course material organised in one place.</p>
+            </div>
+            <button class="text-link">View all categories →</button>
+          </div>
+          <div class="category-grid">
+            <button
+              class="category"
+              style="--tint: #eaf0ff"
+              data-category="Web Programming"
+            >
+              <span class="category-symbol">⌘</span
+              ><strong>Web Programming</strong><small>7 resources</small>
+            </button>
+            <button
+              class="category"
+              style="--tint: #eeeaff"
+              data-category="Graphics and Visual Computing"
+            >
+              <span class="category-symbol">◉</span
+              ><strong>Graphics &amp; Visual</strong><small>4 resources</small>
+            </button>
+            <button
+              class="category"
+              style="--tint: #e5f7f1"
+              data-category="Operating Systems"
+            >
+              <span class="category-symbol">▱</span
+              ><strong>Operating Systems</strong><small>5 resources</small>
+            </button>
+            <button
+              class="category"
+              style="--tint: #fff1df"
+              data-category="Computer Networks"
+            >
+              <span class="category-symbol">⌁</span
+              ><strong>Computer Networks</strong><small>5 resources</small>
+            </button>
+            <button
+              class="category"
+              style="--tint: #f1f3f7"
+              data-category="General"
+            >
+              <span class="category-symbol">✦</span><strong>General</strong
+              ><small>3 resources</small>
+            </button>
+          </div>
+        </section>
+        <section class="dashboard-view">
+          <div class="section-head">
+            <div>
+              <h2>Your resource library</h2>
+              <p>Recently added course materials and references.</p>
+            </div>
+            <button class="text-link" id="openUrl">+ Add webpage link</button>
+          </div>
+          <div class="library-card">
+            <div class="library-tools">
+              <label class="search"
+                ><span>⌕</span
+                ><input
+                  id="search"
+                  type="search"
+                  placeholder="Search resources…" /></label
+              ><select class="filter" id="categoryFilter">
+                <option value="">All categories</option>
+                <option>Web Programming</option>
+                <option>Graphics and Visual Computing</option>
+                <option>Operating Systems</option>
+                <option>Computer Networks</option>
+                <option>General</option></select
+              ><select class="filter" id="typeFilter">
+                <option value="">All types</option>
+                <option>PDF</option>
+                <option>PPTX</option>
+                <option>DOCX</option>
+                <option>WEBPAGE_LINK</option>
+                <option>IMAGE</option>
+              </select>
+            </div>
+            <table class="resource-table">
+              <thead>
+                <tr>
+                  <th>Resource</th>
+                  <th>Category</th>
+                  <th>Added</th>
+                  <th>Type</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="resourceRows"></tbody>
+            </table>
+            <div class="empty" id="emptyState">
+              No resources match these filters.
+            </div>
+            <div class="table-footer">
+              <span id="tableSummary">Showing 6 of 24 resources</span
+              ><span>1–6 of 24</span>
+            </div>
+          </div>
+        </section>
+        <section id="libraryView" hidden>
+          <div class="library-page-head">
+            <div>
+              <h2>My Library</h2>
+              <p>Browse course folders and organise your personal learning materials.</p>
+            </div>
+            <button class="primary" id="newFolderButton" type="button">+ New folder</button>
+          </div>
+          <nav class="folder-breadcrumbs" id="folderBreadcrumbs" aria-label="Folder path"></nav>
+          <div class="folder-grid" id="folderGrid"></div>
+          <div class="library-card folder-files" id="folderFiles" hidden>
+            <div class="folder-files-head"><strong>Files in this folder</strong><span id="folderFileCount"></span></div>
+            <table class="resource-table">
+              <thead><tr><th>Resource</th><th>Category</th><th>Added</th><th>Type</th><th></th></tr></thead>
+              <tbody id="libraryResourceRows"></tbody>
+            </table>
+          </div>
+          <div class="empty library-empty" id="libraryEmpty">This folder is empty.</div>
+        </section>
+      </main>
+    </div>
+    <div class="modal-backdrop" id="uploadModal">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="uploadTitle"
+      >
+        <div class="modal-header">
+          <div>
+            <h2 id="uploadTitle">Add a resource</h2>
+            <p>Upload a document for automatic classification.</p>
+          </div>
+          <button class="close" data-close="uploadModal">×</button>
+        </div>
+        <form id="fileForm">
+          <label class="dropzone" for="resourceFile">
+            <span class="upload-icon" aria-hidden="true">&uarr;</span>
+            <span class="dropzone-title">
+              Drop your file here, or <span class="browse">browse</span>
+            </span>
+            <span class="dropzone-hint">
+              PDF, PPTX, DOCX, JPG, PNG or MP4 &middot; Max file size is set by your server
+            </span>
+            <input
+              id="resourceFile"
+              name="file"
+              type="file"
+              accept=".pdf,.pptx,.docx,.jpg,.jpeg,.png,.mp4"
+            />
+          </label>
+          <div class="notice" id="fileNotice"></div>
+          <div class="modal-actions">
+            <button type="button" class="secondary" data-close="uploadModal">
+              Cancel</button
+            ><button class="primary" id="fileSubmit" type="submit">
+              Analyse resource
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="urlModal">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="urlTitle"
+      >
+        <div class="modal-header">
+          <div>
+            <h2 id="urlTitle">Add a webpage link</h2>
+            <p>We’ll extract its content and categorise it for you.</p>
+          </div>
+          <button class="close" data-close="urlModal">×</button>
+        </div>
+        <form id="urlForm">
+          <label class="form-label" for="resourceUrl">Webpage URL</label
+          ><input
+            class="form-input"
+            id="resourceUrl"
+            type="url"
+            placeholder="https://example.com/article"
+            required
+          />
+          <div class="notice" id="urlNotice"></div>
+          <div class="modal-actions">
+            <button type="button" class="secondary" data-close="urlModal">
+              Cancel</button
+            ><button class="primary" id="urlSubmit" type="submit">
+              Analyse webpage
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="deleteModal">
+      <div
+        class="modal confirm-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteTitle"
+      >
+        <div class="warning-icon">!</div>
+        <h2 id="deleteTitle">Delete resource?</h2>
+        <p id="deleteMessage">
+          This resource will be removed from your library. This action cannot be
+          undone.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="secondary" data-close="deleteModal">
+            Keep resource</button
+          ><button type="button" class="primary danger" id="confirmDelete">
+            Delete resource
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="categoryModal">
+      <div class="modal category-modal" role="dialog" aria-modal="true" aria-labelledby="categoryTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="categoryTitle">Review category</h2>
+            <p id="categoryResourceName"></p>
+          </div>
+          <button class="close" data-close="categoryModal" aria-label="Close category editor">×</button>
+        </div>
+        <label class="form-label" for="categorySelect">Primary category</label>
+        <select class="form-input" id="categorySelect"></select>
+        <div class="category-evidence" id="categoryEvidence"></div>
+        <div class="notice" id="categoryNotice"></div>
+        <div class="modal-actions">
+          <button class="secondary" id="reclassifyButton" type="button">Run classifier again</button>
+          <button class="primary" id="saveCategoryButton" type="button">Save correction</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="folderModal">
+      <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle">
+        <div class="modal-header">
+          <div><h2 id="folderModalTitle">New folder</h2><p>Folders can be renamed at any time.</p></div>
+          <button class="close" data-close="folderModal" aria-label="Close folder editor">×</button>
+        </div>
+        <form id="folderForm">
+          <label class="form-label" for="folderName">Folder name</label>
+          <input class="form-input" id="folderName" maxlength="100" required />
+          <div class="notice" id="folderNotice"></div>
+          <div class="modal-actions">
+            <button class="secondary" type="button" data-close="folderModal">Cancel</button>
+            <button class="primary" type="submit">Save folder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-backdrop viewer-backdrop" id="viewerModal">
+      <div class="modal viewer-modal" role="dialog" aria-modal="true" aria-labelledby="viewerTitle">
+        <div class="modal-header viewer-header">
+          <div>
+            <h2 id="viewerTitle">Document</h2>
+            <span class="tag" id="viewerCategory">General</span>
+          </div>
+          <button class="close" data-close="viewerModal" aria-label="Close document viewer">×</button>
+        </div>
+        <div class="topic-panel">
+          <div><strong>Related topics</strong><small> Select a label to jump to its first matching page.</small></div>
+          <div class="topic-list" id="viewerTopics"></div>
+          <form class="topic-form" id="topicForm">
+            <input class="form-input" id="newTopic" maxlength="100" placeholder="Add a label" required />
+            <button class="secondary" type="submit">Add</button>
+          </form>
+        </div>
+        <iframe id="pdfViewer" title="PDF document viewer" src="about:blank"></iframe>
+      </div>
+    </div>
+    <script src="script.js?v=7"></script>
+  </body>
+</html>
