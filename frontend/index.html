@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Intelligent Digital Library | File Manager</title>
-    <link rel="stylesheet" href="style.css?v=7" />
+    <link rel="stylesheet" href="style.css?v=8" />
   </head>
   <body>
     <section class="auth-shell" id="authShell">
@@ -52,8 +52,8 @@
             <span class="nav-icon">▦</span>Dashboard
           </button>
           <button id="libraryNav"><span class="nav-icon">▤</span>My Library</button>
-          <button><span class="nav-icon">◈</span>Categories</button>
-          <button><span class="nav-icon">◷</span>Recent activity</button>
+          <button id="categoriesNav"><span class="nav-icon">◈</span>Categories</button>
+          <button id="activityNav"><span class="nav-icon">◷</span>Recent activity</button>
         </nav>
         <div class="sidebar-footer">
           <div class="avatar" id="userAvatar">AC</div>
@@ -70,8 +70,16 @@
             <h1 id="welcomeHeading">Good afternoon, Arthur</h1>
           </div>
           <div class="top-actions">
-            <button class="icon-btn" aria-label="Notifications">♢</button
-            ><button class="primary" id="openUpload">
+            <div class="notification-wrap">
+              <button class="icon-btn" id="notificationButton" aria-label="Notifications" aria-expanded="false">
+                ♢<span class="notification-badge" id="notificationBadge" hidden>0</span>
+              </button>
+              <div class="notification-panel" id="notificationPanel" hidden>
+                <div class="notification-head"><strong>Notifications</strong><span id="notificationSummary"></span></div>
+                <div id="notificationList"></div>
+              </div>
+            </div>
+            <button class="primary" id="openUpload">
               <span>+</span> Add resource
             </button>
           </div>
@@ -83,23 +91,21 @@
               ><span class="stat-icon blue-bg">▤</span>
             </div>
             <div class="stat-value" id="totalCount">24</div>
-            <div class="stat-detail">
-              <span class="up">↑ 12%</span> from last month
-            </div>
+            <div class="stat-detail" id="totalDetail">Your complete library</div>
           </article>
           <article class="stat">
             <div class="stat-row">
               <span>Documents</span><span class="stat-icon purple-bg">▣</span>
             </div>
-            <div class="stat-value">16</div>
-            <div class="stat-detail">PDFs and DOCX files</div>
+            <div class="stat-value" id="documentCount">0</div>
+            <div class="stat-detail">PDF, DOCX and PPTX files</div>
           </article>
           <article class="stat">
             <div class="stat-row">
               <span>Web resources</span
               ><span class="stat-icon green-bg">⌁</span>
             </div>
-            <div class="stat-value">6</div>
+            <div class="stat-value" id="webCount">0</div>
             <div class="stat-detail">Articles and references</div>
           </article>
           <article class="stat">
@@ -107,7 +113,7 @@
               <span>Recently added</span
               ><span class="stat-icon amber-bg">◷</span>
             </div>
-            <div class="stat-value">4</div>
+            <div class="stat-value" id="recentCount">0</div>
             <div class="stat-detail">In the last 7 days</div>
           </article>
         </section>
@@ -117,50 +123,9 @@
               <h2>Browse by category</h2>
               <p>Keep your course material organised in one place.</p>
             </div>
-            <button class="text-link">View all categories →</button>
+            <button class="text-link" id="viewAllCategories">View all categories →</button>
           </div>
-          <div class="category-grid">
-            <button
-              class="category"
-              style="--tint: #eaf0ff"
-              data-category="Web Programming"
-            >
-              <span class="category-symbol">⌘</span
-              ><strong>Web Programming</strong><small>7 resources</small>
-            </button>
-            <button
-              class="category"
-              style="--tint: #eeeaff"
-              data-category="Graphics and Visual Computing"
-            >
-              <span class="category-symbol">◉</span
-              ><strong>Graphics &amp; Visual</strong><small>4 resources</small>
-            </button>
-            <button
-              class="category"
-              style="--tint: #e5f7f1"
-              data-category="Operating Systems"
-            >
-              <span class="category-symbol">▱</span
-              ><strong>Operating Systems</strong><small>5 resources</small>
-            </button>
-            <button
-              class="category"
-              style="--tint: #fff1df"
-              data-category="Computer Networks"
-            >
-              <span class="category-symbol">⌁</span
-              ><strong>Computer Networks</strong><small>5 resources</small>
-            </button>
-            <button
-              class="category"
-              style="--tint: #f1f3f7"
-              data-category="General"
-            >
-              <span class="category-symbol">✦</span><strong>General</strong
-              ><small>3 resources</small>
-            </button>
-          </div>
+          <div class="category-grid" id="dashboardCategoryGrid"></div>
         </section>
         <section class="dashboard-view">
           <div class="section-head">
@@ -192,6 +157,7 @@
                 <option>DOCX</option>
                 <option>WEBPAGE_LINK</option>
                 <option>IMAGE</option>
+                <option>VIDEO</option>
               </select>
             </div>
             <table class="resource-table">
@@ -210,8 +176,8 @@
               No resources match these filters.
             </div>
             <div class="table-footer">
-              <span id="tableSummary">Showing 6 of 24 resources</span
-              ><span>1–6 of 24</span>
+              <span id="tableSummary">Showing 0 of 0 resources</span
+              ><span id="tableRange">0 resources</span>
             </div>
           </div>
         </section>
@@ -233,6 +199,26 @@
             </table>
           </div>
           <div class="empty library-empty" id="libraryEmpty">This folder is empty.</div>
+        </section>
+        <section class="standalone-view" id="categoriesView" hidden>
+          <div class="library-page-head">
+            <div>
+              <h2>Categories</h2>
+              <p>Explore every subject represented in your library.</p>
+            </div>
+          </div>
+          <div class="category-grid categories-directory" id="allCategoryGrid"></div>
+          <div class="empty library-empty" id="categoriesEmpty">Upload a resource to start building your categories.</div>
+        </section>
+        <section class="standalone-view" id="activityView" hidden>
+          <div class="library-page-head">
+            <div>
+              <h2>Recent activity</h2>
+              <p>Your latest additions, ordered from newest to oldest.</p>
+            </div>
+          </div>
+          <div class="activity-list" id="activityList"></div>
+          <div class="empty library-empty" id="activityEmpty">Your activity will appear after you add a resource.</div>
         </section>
       </main>
     </div>
@@ -266,11 +252,23 @@
               accept=".pdf,.pptx,.docx,.jpg,.jpeg,.png,.mp4"
             />
           </label>
-          <div class="notice" id="fileNotice"></div>
+          <div class="selected-file" id="selectedFile" hidden>
+            <span class="selected-file-icon" id="selectedFileIcon">DOC</span>
+            <span class="selected-file-copy">
+              <strong id="selectedFileName"></strong>
+              <small id="selectedFileMeta"></small>
+            </span>
+            <button type="button" class="remove-file" id="removeSelectedFile" aria-label="Remove selected file">×</button>
+          </div>
+          <div class="upload-progress" id="uploadProgress" hidden aria-live="polite">
+            <div class="upload-progress-copy"><strong id="uploadProgressLabel">Uploading…</strong><span id="uploadProgressValue">0%</span></div>
+            <div class="upload-progress-track"><span id="uploadProgressBar"></span></div>
+          </div>
+          <div class="notice" id="fileNotice" aria-live="polite"></div>
           <div class="modal-actions">
             <button type="button" class="secondary" data-close="uploadModal">
               Cancel</button
-            ><button class="primary" id="fileSubmit" type="submit">
+            ><button class="primary" id="fileSubmit" type="submit" disabled>
               Analyse resource
             </button>
           </div>
@@ -389,6 +387,6 @@
         <iframe id="pdfViewer" title="PDF document viewer" src="about:blank"></iframe>
       </div>
     </div>
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
   </body>
 </html>

@@ -12,6 +12,8 @@ let currentFolderId = null;
 let folderBeingRenamed = null;
 let libraryResources = [];
 let currentUserGreeting = "My Library";
+let currentView = "dashboard";
+let uploadInProgress = false;
 
 const authShell = document.getElementById("authShell");
 const dashboard = document.getElementById("dashboard");
@@ -22,6 +24,8 @@ const typeFilter = document.getElementById("typeFilter");
 
 const icons = { PDF: "PDF", PPTX: "PPT", DOCX: "DOC", WEBPAGE_LINK: "↗", IMAGE: "IMG", VIDEO: "VID" };
 const classes = { PDF: "pdf", PPTX: "pptx", DOCX: "docx", WEBPAGE_LINK: "link", IMAGE: "image", VIDEO: "image" };
+const categoryTints = ["#eaf0ff", "#eeeaff", "#e5f7f1", "#fff1df", "#f1f3f7", "#fdebf3"];
+const categorySymbols = ["⌘", "◉", "▱", "⌁", "✦", "◇"];
 
 function authHeaders(extra = {}) {
     return accessToken ? { ...extra, Authorization: "Bearer " + accessToken } : extra;
@@ -63,7 +67,9 @@ function showAuthentication() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     dashboard.hidden = true;
     authShell.hidden = false;
+    closeNotifications();
     renderResources();
+    renderDashboard();
 }
 
 function showDashboard(user) {
@@ -77,23 +83,39 @@ function showDashboard(user) {
     document.getElementById("welcomeHeading").textContent = currentUserGreeting;
     authShell.hidden = true;
     dashboard.hidden = false;
+    showAppView("dashboard");
     loadResources();
     loadCategories();
 }
 
 function showAppView(view) {
-    const libraryMode = view === "library";
-    document.querySelectorAll(".dashboard-view").forEach((section) => section.hidden = libraryMode);
-    document.getElementById("libraryView").hidden = !libraryMode;
-    document.getElementById("dashboardNav").classList.toggle("active", !libraryMode);
-    document.getElementById("libraryNav").classList.toggle("active", libraryMode);
-    document.getElementById("pageBreadcrumb").textContent = libraryMode ? "Workspace / My Library" : "Workspace / Overview";
-    document.getElementById("welcomeHeading").textContent = libraryMode ? "My Library" : currentUserGreeting;
-    if (libraryMode) loadFolder(null);
+    currentView = view;
+    const labels = {
+        dashboard: ["Workspace / Overview", currentUserGreeting],
+        library: ["Workspace / My Library", "My Library"],
+        categories: ["Workspace / Categories", "Categories"],
+        activity: ["Workspace / Recent activity", "Recent activity"],
+    };
+    document.querySelectorAll(".dashboard-view").forEach((section) => section.hidden = view !== "dashboard");
+    document.getElementById("libraryView").hidden = view !== "library";
+    document.getElementById("categoriesView").hidden = view !== "categories";
+    document.getElementById("activityView").hidden = view !== "activity";
+    ["dashboard", "library", "categories", "activity"].forEach((name) => {
+        document.getElementById(`${name}Nav`).classList.toggle("active", view === name);
+    });
+    document.getElementById("pageBreadcrumb").textContent = labels[view][0];
+    document.getElementById("welcomeHeading").textContent = labels[view][1];
+    closeNotifications();
+    if (view === "library") loadFolder(null);
+    if (view === "categories") renderCategoryViews();
+    if (view === "activity") renderActivity();
 }
 
 document.getElementById("dashboardNav").onclick = () => showAppView("dashboard");
 document.getElementById("libraryNav").onclick = () => showAppView("library");
+document.getElementById("categoriesNav").onclick = () => showAppView("categories");
+document.getElementById("activityNav").onclick = () => showAppView("activity");
+document.getElementById("viewAllCategories").onclick = () => showAppView("categories");
 
 async function restoreSession() {
     if (!accessToken) return showAuthentication();
@@ -172,6 +194,7 @@ async function loadResources() {
         if (!response.ok) throw new Error("Your library could not be loaded.");
         resources = (await response.json()).map(normalizeResource);
         renderResources();
+        renderDashboard();
     } catch (error) {
         document.getElementById("emptyState").textContent = error.message;
         document.getElementById("emptyState").style.display = "block";
@@ -183,10 +206,11 @@ async function loadCategories() {
     if (response.ok) {
         availableCategories = await response.json();
         const selected = categoryFilter.value;
-        categoryFilter.innerHTML = '<option value="">All categories</option>' + availableCategories.map(
+        const filterCategories = [...new Set(["General", ...availableCategories])].sort();
+        categoryFilter.innerHTML = '<option value="">All categories</option>' + filterCategories.map(
             (category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`,
         ).join("");
-        if (availableCategories.includes(selected)) categoryFilter.value = selected;
+        if (filterCategories.includes(selected)) categoryFilter.value = selected;
     }
     return availableCategories;
 }
@@ -194,7 +218,7 @@ async function loadCategories() {
 function renderResources() {
     const query = search.value.toLowerCase();
     const filtered = resources.filter((resource) =>
-        (!query || (resource.name + resource.category + resource.type).toLowerCase().includes(query)) &&
+        (!query || (resource.name + resource.category + resource.type + resource.topics.map((topic) => topic.name).join(" ")).toLowerCase().includes(query)) &&
         (!categoryFilter.value || resource.category === categoryFilter.value) &&
         (!typeFilter.value || resource.type === typeFilter.value),
     );
@@ -202,12 +226,88 @@ function renderResources() {
     document.getElementById("emptyState").style.display = filtered.length ? "none" : "block";
     document.getElementById("emptyState").textContent = "No resources match these filters.";
     document.getElementById("tableSummary").textContent = `Showing ${filtered.length} of ${resources.length} resources`;
+    document.getElementById("tableRange").textContent = `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`;
     document.getElementById("totalCount").textContent = resources.length;
+}
+
+function renderDashboard() {
+    const now = Date.now();
+    const recentResources = resources.filter((resource) => {
+        const createdAt = new Date(resource.created_at).getTime();
+        return Number.isFinite(createdAt) && now - createdAt <= 7 * 24 * 60 * 60 * 1000;
+    });
+    const documents = resources.filter((resource) => ["PDF", "DOCX", "PPTX"].includes(resource.type));
+    const webResources = resources.filter((resource) => resource.type === "WEBPAGE_LINK");
+    document.getElementById("totalCount").textContent = resources.length;
+    document.getElementById("documentCount").textContent = documents.length;
+    document.getElementById("webCount").textContent = webResources.length;
+    document.getElementById("recentCount").textContent = recentResources.length;
+    document.getElementById("totalDetail").textContent = resources.length
+        ? `${categoryCounts().length} ${categoryCounts().length === 1 ? "category" : "categories"}`
+        : "Your complete library";
+    renderCategoryViews();
+    renderActivity();
+    renderNotifications();
+}
+
+function categoryCounts() {
+    const counts = new Map();
+    resources.forEach((resource) => counts.set(resource.category, (counts.get(resource.category) || 0) + 1));
+    return [...counts.entries()]
+        .map(([name, count]) => ({ name, count }))
+        .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
+}
+
+function categoryCardMarkup(category, index) {
+    const noun = category.count === 1 ? "resource" : "resources";
+    return `<button class="category" style="--tint: ${categoryTints[index % categoryTints.length]}" data-category="${escapeHtml(category.name)}">
+      <span class="category-symbol">${categorySymbols[index % categorySymbols.length]}</span>
+      <strong>${escapeHtml(category.name)}</strong><small>${category.count} ${noun}</small>
+    </button>`;
+}
+
+function renderCategoryViews() {
+    const categories = categoryCounts();
+    const dashboardGrid = document.getElementById("dashboardCategoryGrid");
+    const allGrid = document.getElementById("allCategoryGrid");
+    dashboardGrid.innerHTML = categories.slice(0, 5).map(categoryCardMarkup).join("") ||
+        '<div class="category-placeholder">Your classified subjects will appear here.</div>';
+    allGrid.innerHTML = categories.map(categoryCardMarkup).join("");
+    document.getElementById("categoriesEmpty").style.display = categories.length ? "none" : "block";
+}
+
+function renderActivity() {
+    const recent = [...resources]
+        .sort((left, right) => new Date(right.created_at) - new Date(left.created_at))
+        .slice(0, 20);
+    document.getElementById("activityList").innerHTML = recent.map((resource) => `
+      <article class="activity-item">
+        <span class="file-icon ${classes[resource.type] || ""}">${icons[resource.type] || "FILE"}</span>
+        <div><strong>${escapeHtml(resource.name)}</strong><p>Added to ${escapeHtml(resource.category)}</p></div>
+        <time datetime="${escapeHtml(resource.created_at)}">${escapeHtml(resource.date)}</time>
+      </article>`).join("");
+    document.getElementById("activityEmpty").style.display = recent.length ? "none" : "block";
+}
+
+function renderNotifications() {
+    const reviewItems = resources.filter((resource) => resource.category_review_required);
+    const badge = document.getElementById("notificationBadge");
+    badge.textContent = reviewItems.length;
+    badge.hidden = !reviewItems.length;
+    document.getElementById("notificationSummary").textContent = reviewItems.length
+        ? `${reviewItems.length} to review`
+        : "All clear";
+    document.getElementById("notificationList").innerHTML = reviewItems.length
+        ? reviewItems.slice(0, 6).map((resource) => `
+          <button class="notification-item" data-resource-id="${resource.id}">
+            <span>!</span><div><strong>Review category</strong><small>${escapeHtml(resource.name)}</small></div>
+          </button>`).join("")
+        : '<div class="notification-empty">No categories need your review.</div>';
 }
 
 function resourceRowMarkup(resource) {
     return `<tr>
-      <td><div class="resource-main"><span class="file-icon ${classes[resource.type]}">${icons[resource.type]}</span>
+      <td><div class="resource-main"><span class="file-icon ${classes[resource.type] || ""}">${icons[resource.type] || "FILE"}</span>
         <div><button class="open-resource" data-id="${resource.id}">${escapeHtml(resource.name)}</button>
         <div class="resource-topics">${resource.topics.slice(0, 3).map((topic) => `<span>${escapeHtml(topic.name)}</span>`).join("")}</div></div></div></td>
       <td><button class="tag edit-category" data-id="${resource.id}" title="Review or correct category">
@@ -288,11 +388,13 @@ document.getElementById("folderForm").addEventListener("submit", async (event) =
 
 function openModal(id) { document.getElementById(id).classList.add("open"); }
 function closeModal(id) {
+    if (id === "uploadModal" && uploadInProgress) return;
     document.getElementById(id).classList.remove("open");
     if (id === "viewerModal") {
         document.getElementById("pdfViewer").src = "about:blank";
         currentViewedResource = null;
     }
+    if (id === "uploadModal") resetFileSelection();
 }
 
 document.getElementById("openUpload").onclick = () => openModal("uploadModal");
@@ -303,13 +405,48 @@ document.querySelectorAll("[data-close]").forEach((button) => {
 document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
     backdrop.onclick = (event) => { if (event.target === backdrop) closeModal(backdrop.id); };
 });
-document.querySelectorAll(".category").forEach((card) => {
-    card.onclick = () => {
-        categoryFilter.value = card.dataset.category;
-        renderResources();
-        document.querySelector(".library-card").scrollIntoView({ behavior: "smooth", block: "start" });
-    };
+function filterByCategory(category) {
+    showAppView("dashboard");
+    if (![...categoryFilter.options].some((option) => option.value === category)) {
+        categoryFilter.add(new Option(category, category));
+    }
+    search.value = "";
+    typeFilter.value = "";
+    categoryFilter.value = category;
+    renderResources();
+    document.querySelector(".library-card").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+["dashboardCategoryGrid", "allCategoryGrid"].forEach((id) => {
+    document.getElementById(id).addEventListener("click", (event) => {
+        const card = event.target.closest(".category");
+        if (card) filterByCategory(card.dataset.category);
+    });
 });
+
+function closeNotifications() {
+    const panel = document.getElementById("notificationPanel");
+    panel.hidden = true;
+    document.getElementById("notificationButton").setAttribute("aria-expanded", "false");
+}
+
+document.getElementById("notificationButton").addEventListener("click", (event) => {
+    event.stopPropagation();
+    const panel = document.getElementById("notificationPanel");
+    panel.hidden = !panel.hidden;
+    event.currentTarget.setAttribute("aria-expanded", String(!panel.hidden));
+});
+
+document.getElementById("notificationPanel").addEventListener("click", (event) => {
+    event.stopPropagation();
+    const item = event.target.closest(".notification-item");
+    if (item) {
+        closeNotifications();
+        openCategoryEditor(Number(item.dataset.resourceId));
+    }
+});
+
+document.addEventListener("click", closeNotifications);
 [search, categoryFilter, typeFilter].forEach((element) => element.addEventListener("input", renderResources));
 
 function handleResourceClick(event) {
@@ -362,6 +499,7 @@ function replaceResource(updated) {
     currentCategoryResource = normalized;
     if (currentViewedResource?.id === normalized.id) currentViewedResource = normalized;
     renderResources();
+    renderDashboard();
     document.getElementById("libraryResourceRows").innerHTML = libraryResources.map(resourceRowMarkup).join("");
     return normalized;
 }
@@ -408,6 +546,7 @@ document.getElementById("confirmDelete").onclick = async () => {
         resourceToDelete = null;
         closeModal("deleteModal");
         renderResources();
+        renderDashboard();
         if (!document.getElementById("libraryView").hidden) loadFolder(currentFolderId);
     } catch (error) {
         alert(error.message);
@@ -491,31 +630,161 @@ document.getElementById("topicForm").addEventListener("submit", async (event) =>
     renderResources();
 });
 
-document.getElementById("fileForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const file = document.getElementById("resourceFile").files[0];
-    if (!file) return notice("fileNotice", "Choose a file to continue.", "error");
-    const button = document.getElementById("fileSubmit");
-    button.disabled = true;
-    button.textContent = "Analysing...";
-    try {
+const fileInput = document.getElementById("resourceFile");
+const dropzone = document.querySelector(".dropzone");
+const supportedExtensions = ["pdf", "pptx", "docx", "jpg", "jpeg", "png", "mp4"];
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function selectedFileType(file) {
+    return file.name.split(".").pop()?.toUpperCase() || "FILE";
+}
+
+function updateSelectedFile() {
+    const file = fileInput.files[0];
+    const selected = document.getElementById("selectedFile");
+    const submit = document.getElementById("fileSubmit");
+    document.getElementById("uploadProgress").hidden = true;
+    if (!file) {
+        selected.hidden = true;
+        dropzone.classList.remove("has-file");
+        submit.disabled = true;
+        return;
+    }
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    if (!supportedExtensions.includes(extension)) {
+        fileInput.value = "";
+        notice("fileNotice", "Choose a PDF, PPTX, DOCX, JPG, PNG or MP4 file.", "error");
+        return updateSelectedFile();
+    }
+    document.getElementById("selectedFileName").textContent = file.name;
+    document.getElementById("selectedFileMeta").textContent = `${selectedFileType(file)} · ${formatFileSize(file.size)} · Ready to analyse`;
+    document.getElementById("selectedFileIcon").textContent = selectedFileType(file).slice(0, 4);
+    selected.hidden = false;
+    dropzone.classList.add("has-file");
+    submit.disabled = false;
+    notice("fileNotice", "Document selected. Click Analyse resource when you are ready.", "success");
+}
+
+function resetFileSelection() {
+    if (uploadInProgress) return;
+    fileInput.value = "";
+    fileInput.disabled = false;
+    document.getElementById("removeSelectedFile").disabled = false;
+    document.getElementById("selectedFile").hidden = true;
+    document.getElementById("uploadProgress").hidden = true;
+    document.getElementById("uploadProgressBar").style.width = "0%";
+    document.getElementById("uploadProgress").classList.remove("analysing");
+    document.getElementById("fileSubmit").disabled = true;
+    document.getElementById("fileSubmit").textContent = "Analyse resource";
+    dropzone.classList.remove("has-file", "dragging", "uploading");
+    notice("fileNotice", "", "");
+}
+
+function setUploadProgress(percent, label = "Uploading document…") {
+    const progress = document.getElementById("uploadProgress");
+    progress.hidden = false;
+    progress.classList.remove("analysing");
+    document.getElementById("uploadProgressLabel").textContent = label;
+    document.getElementById("uploadProgressValue").textContent = `${percent}%`;
+    document.getElementById("uploadProgressBar").style.width = `${percent}%`;
+}
+
+function uploadFileWithProgress(file) {
+    return new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("POST", API_BASE_URL + "/resources");
+        if (accessToken) request.setRequestHeader("Authorization", "Bearer " + accessToken);
+        request.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        });
+        request.upload.addEventListener("load", () => {
+            const progress = document.getElementById("uploadProgress");
+            progress.hidden = false;
+            progress.classList.add("analysing");
+            document.getElementById("uploadProgressLabel").textContent = "Upload complete — analysing content…";
+            document.getElementById("uploadProgressValue").textContent = "Processing";
+            document.getElementById("uploadProgressBar").style.width = "100%";
+        });
+        request.addEventListener("load", () => {
+            let data = {};
+            try { data = JSON.parse(request.responseText); } catch (_) { data = {}; }
+            if (request.status >= 200 && request.status < 300) return resolve(data);
+            const error = new Error(formatApiError(data));
+            error.status = request.status;
+            reject(error);
+        });
+        request.addEventListener("error", () => reject(new Error("The upload could not be completed. Check your connection and try again.")));
         const body = new FormData();
         body.append("file", file);
-        const response = await fetch(API_BASE_URL + "/resources", { method: "POST", headers: authHeaders(), body });
-        if (response.status === 401) return showAuthentication();
-        const data = await response.json();
-        if (!response.ok) throw new Error(formatApiError(data));
+        request.send(body);
+    });
+}
+
+fileInput.addEventListener("change", updateSelectedFile);
+document.getElementById("removeSelectedFile").addEventListener("click", resetFileSelection);
+["dragenter", "dragover"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    if (!uploadInProgress) dropzone.classList.add("dragging");
+}));
+["dragleave", "drop"].forEach((eventName) => dropzone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    dropzone.classList.remove("dragging");
+}));
+dropzone.addEventListener("drop", (event) => {
+    if (uploadInProgress || !event.dataTransfer.files.length) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(event.dataTransfer.files[0]);
+    fileInput.files = transfer.files;
+    updateSelectedFile();
+});
+
+document.getElementById("fileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const file = fileInput.files[0];
+    if (!file) return notice("fileNotice", "Choose a file to continue.", "error");
+    const button = document.getElementById("fileSubmit");
+    uploadInProgress = true;
+    button.disabled = true;
+    button.textContent = "Uploading…";
+    fileInput.disabled = true;
+    dropzone.classList.add("uploading");
+    document.getElementById("removeSelectedFile").disabled = true;
+    notice("fileNotice", "Keep this window open while your resource is processed.", "");
+    setUploadProgress(0);
+    let succeeded = false;
+    try {
+        const data = await uploadFileWithProgress(file);
+        succeeded = true;
         resources.unshift(normalizeResource(data));
         renderResources();
-        form.reset();
+        renderDashboard();
+        document.getElementById("uploadProgress").classList.remove("analysing");
+        document.getElementById("uploadProgressLabel").textContent = "Analysis complete";
+        document.getElementById("uploadProgressValue").textContent = "100%";
+        button.textContent = "Complete";
         notice("fileNotice", `Resource classified as ${data.category}.`, "success");
-        setTimeout(() => closeModal("uploadModal"), 900);
+        setTimeout(() => {
+            uploadInProgress = false;
+            closeModal("uploadModal");
+        }, 1200);
     } catch (error) {
+        if (error.status === 401) return showAuthentication();
         notice("fileNotice", error.message, "error");
     } finally {
-        button.disabled = false;
-        button.textContent = "Analyse resource";
+        if (!succeeded) {
+            uploadInProgress = false;
+            button.disabled = false;
+            button.textContent = "Try again";
+            fileInput.disabled = false;
+            dropzone.classList.remove("uploading");
+            document.getElementById("removeSelectedFile").disabled = false;
+            document.getElementById("uploadProgress").classList.remove("analysing");
+        }
     }
 });
 
@@ -535,6 +804,7 @@ document.getElementById("urlForm").addEventListener("submit", async (event) => {
         if (!response.ok) throw new Error(formatApiError(data));
         resources.unshift(normalizeResource(data));
         renderResources();
+        renderDashboard();
         form.reset();
         notice("urlNotice", `Webpage classified as ${data.category}.`, "success");
         setTimeout(() => closeModal("urlModal"), 900);
