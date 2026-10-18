@@ -265,6 +265,26 @@ def test_hybrid_classifier_separates_data_mining_from_operating_systems():
     assert len(available_categories()) >= 25
 
 
+def test_unza_taxonomy_improves_course_code_classification():
+    security = classify_document(
+        "CSC-3742_week-6.pdf",
+        [{"page": 1, "text": "Authentication, cryptography and network access control"}],
+    )
+    databases = classify_document(
+        "csc3712 tutorial.docx",
+        [{"page": 1, "text": "Query optimization and transaction concurrency control"}],
+    )
+    wireless = classify_document(
+        "CSC4835 lecture.pptx",
+        [{"page": 1, "text": "Wireless protocols, cellular networks and mobility management"}],
+    )
+
+    assert security["category"] == "Cybersecurity"
+    assert databases["category"] == "Database Systems"
+    assert wireless["category"] == "Computer Networks"
+    assert security["review_required"] is False
+
+
 def test_owner_can_correct_category_and_manual_choice_is_persisted():
     register()
     headers = {"Authorization": f"Bearer {token_for()}"}

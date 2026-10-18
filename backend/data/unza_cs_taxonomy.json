@@ -1,0 +1,460 @@
+{
+  "dataset_name": "UNZA Computer Science Curriculum Taxonomy",
+  "version": "1.0.0",
+  "as_of_date": "2026-10-18",
+  "university": "University of Zambia",
+  "academic_scope": "Second through fourth year computing courses evidenced between 2021 and 2026",
+  "classification_policy": {
+    "primary_label": "classifier_category",
+    "exact_course_code_is_strong_evidence": true,
+    "course_name_and_keywords_are_supporting_evidence": true,
+    "synthetic_examples_are_training_only": true,
+    "unknown_or_low_confidence_documents_require_review": true
+  },
+  "programme_structure_note": "Current UNZA webpages list Bachelor of Computer Science, Bachelor of Software Engineering, Bachelor of Computer Systems Engineering, and Bachelor of Computer Networks and Information Security as separate programmes. Older curriculum material describes Software Engineering and Computer Systems Engineering as options within Computer Science. Stream fields below preserve only explicitly evidenced legacy mappings; networking programme membership is not inferred from a course title.",
+  "sources": [
+    {
+      "id": "SRC001",
+      "title": "UNZA Computing and Informatics programme listing",
+      "publisher": "University of Zambia",
+      "url": "https://www.unza.zm/school-of-natural-and-applied-sciences/computing-and-informatics",
+      "source_type": "official_webpage",
+      "supports": "Current programme names and separate programme presentation"
+    },
+    {
+      "id": "SRC002",
+      "title": "UNZA official course-name record",
+      "publisher": "University of Zambia Institutional Repository",
+      "url": "https://dspace.unza.zm/server/api/core/bitstreams/b4389086-85e7-4922-938b-8d5ca1b39d34/content",
+      "source_type": "official_document",
+      "supports": "Exact CSC course codes and names recorded in an official UNZA document"
+    },
+    {
+      "id": "SRC003",
+      "title": "Computer Science Department 2024 examination timetable",
+      "publisher": "University of Zambia document, third-party host",
+      "url": "https://www.scribd.com/document/876018526/Computer-Science-Nov-2024-Draft-Exam-Time-Table-3",
+      "source_type": "official_document_third_party_copy",
+      "supports": "Evidence that listed course codes were examined in 2024"
+    },
+    {
+      "id": "SRC004",
+      "title": "UNZA 2025/26 mid-year final examination timetable",
+      "publisher": "University of Zambia document, third-party host",
+      "url": "https://www.studocu.com/row/document/university-of-zambia/econometrics-2/unza-ug-final-exam-timetable-for-academic-year-2026/169704694",
+      "source_type": "official_document_third_party_copy",
+      "supports": "Evidence that listed course codes were examined in July 2026"
+    },
+    {
+      "id": "SRC005",
+      "title": "UNZA Computer Science curriculum summary",
+      "publisher": "Mabumbe",
+      "url": "https://mabumbe.com/za/unza-computer-science-university-of-zambia/",
+      "source_type": "secondary_curriculum_summary",
+      "supports": "Second-year list, legacy SE/CSE option mapping, and names absent from the official course-name record"
+    },
+    {
+      "id": "SRC006",
+      "title": "Computer Studies Department workload example",
+      "publisher": "University of Zambia Institutional Repository",
+      "url": "https://dspace.unza.zm/bitstreams/7b9f7b07-e18c-4295-a078-05b2352773c3/download",
+      "source_type": "official_repository_document",
+      "supports": "Course-code and year-level relationships in a department workload table"
+    },
+    {
+      "id": "SRC007",
+      "title": "Management Information Systems CSC 3750",
+      "publisher": "Studocu",
+      "url": "https://www.studocu.com/row/course/university-of-zambia/management-information-systems/6584584",
+      "source_type": "secondary_course_page",
+      "supports": "CSC 3750 course-name corroboration"
+    }
+  ],
+  "courses": [
+    {
+      "course_code": "CSC 2000",
+      "official_name": "Computer Programming",
+      "year": 2,
+      "classifier_category": "Programming Fundamentals",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["computer programming", "program design", "variables", "data types", "control structures", "loops", "arrays", "functions", "recursion", "debugging"],
+      "aliases": ["CSC2000", "CSC 2000 programming", "introductory programming"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2101",
+      "official_name": "Computer Systems",
+      "year": 2,
+      "classifier_category": "Computer Systems",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["computer systems", "computer hardware", "system software", "input output devices", "storage devices", "motherboard", "system troubleshooting", "computer organization"],
+      "aliases": ["CSC2101", "CSC 2101 systems"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2111",
+      "official_name": "Computer Architecture",
+      "year": 2,
+      "classifier_category": "Computer Architecture",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["computer architecture", "instruction set", "cpu architecture", "memory hierarchy", "cache memory", "pipelining", "assembly language", "processor organization"],
+      "aliases": ["CSC2111", "CSC 2111 architecture"],
+      "verification_status": "confirmed_historical",
+      "source_ids": ["SRC002", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2202",
+      "official_name": "Operating Systems",
+      "year": 2,
+      "classifier_category": "Operating Systems",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["operating systems", "kernel", "process scheduling", "cpu scheduling", "virtual memory", "paging", "deadlock", "semaphore", "file systems"],
+      "aliases": ["CSC2202", "CSC 2202 OS"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2702",
+      "official_name": "Databases and Information Management Systems",
+      "year": 2,
+      "classifier_category": "Database Systems",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["database systems", "information management", "relational database", "sql", "entity relationship model", "normalization", "transactions", "database design"],
+      "aliases": ["CSC2702", "CSC 2702 databases", "database and information management systems"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2901",
+      "official_name": "Discrete Structures",
+      "year": 2,
+      "classifier_category": "Discrete Mathematics",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["discrete structures", "propositional logic", "set theory", "relations", "combinatorics", "graph theory", "mathematical induction", "recurrence relations"],
+      "aliases": ["CSC2901", "CSC 2901 discrete mathematics"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 2912",
+      "official_name": "Numerical Analysis",
+      "year": 2,
+      "classifier_category": "Numerical Computing",
+      "legacy_stream_scope": ["common"],
+      "keywords": ["numerical analysis", "numerical methods", "rounding error", "root finding", "interpolation", "numerical integration", "linear systems", "iterative methods"],
+      "aliases": ["CSC2912", "CSC 2912 numerical methods"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3009",
+      "official_name": "Industrial Training",
+      "year": 3,
+      "classifier_category": "Industrial Training",
+      "legacy_stream_scope": ["unknown"],
+      "keywords": ["industrial training", "industrial attachment", "work placement", "internship report", "workplace supervisor", "practical experience", "logbook"],
+      "aliases": ["CSC3009", "CSC 3009 attachment"],
+      "verification_status": "needs_official_confirmation",
+      "source_ids": []
+    },
+    {
+      "course_code": "CSC 3011",
+      "official_name": "Algorithms and Complexity",
+      "year": 3,
+      "classifier_category": "Data Structures and Algorithms",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["algorithms and complexity", "algorithm design", "time complexity", "big o", "recurrence analysis", "greedy algorithms", "dynamic programming", "graph algorithms"],
+      "aliases": ["CSC3011", "CSC 3011 algorithm and complexity"],
+      "verification_status": "confirmed_historical",
+      "source_ids": ["SRC002", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3120",
+      "official_name": "Digital Electronics",
+      "year": 3,
+      "classifier_category": "Digital Electronics",
+      "legacy_stream_scope": ["computer_systems_engineering"],
+      "keywords": ["digital electronics", "logic gates", "boolean algebra", "combinational circuits", "sequential circuits", "flip flops", "counters", "digital logic"],
+      "aliases": ["CSC3120", "CSC 3120 electronics"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3301",
+      "official_name": "Programming Languages Paradigms",
+      "year": 3,
+      "classifier_category": "Programming Languages",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["programming language paradigms", "functional programming", "logic programming", "imperative programming", "type systems", "syntax", "semantics", "language implementation"],
+      "aliases": ["CSC3301", "programming languages and paradigms"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3312",
+      "official_name": "Structure and Interpretation of Computer Programs",
+      "year": 3,
+      "classifier_category": "Programming Languages",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["structure and interpretation of computer programs", "abstraction", "higher order procedures", "recursive processes", "interpreters", "evaluation", "programming language design"],
+      "aliases": ["CSC3312", "SICP"],
+      "verification_status": "secondary_source_only",
+      "source_ids": ["SRC005"]
+    },
+    {
+      "course_code": "CSC 3402",
+      "official_name": "Fundamentals of Artificial Intelligence",
+      "year": 3,
+      "classifier_category": "Artificial Intelligence",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["fundamentals of artificial intelligence", "intelligent agents", "heuristic search", "knowledge representation", "reasoning", "planning", "expert systems", "machine intelligence"],
+      "aliases": ["CSC3402", "CSC 3402 AI", "artificial intelligence fundamentals"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3600",
+      "official_name": "Software Engineering",
+      "year": 3,
+      "classifier_category": "Software Engineering",
+      "legacy_stream_scope": ["software_engineering"],
+      "keywords": ["software engineering", "software development lifecycle", "requirements engineering", "software design", "uml", "software architecture", "agile development", "configuration management"],
+      "aliases": ["CSC3600", "CSC 3600 software engineering"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3612",
+      "official_name": "IT Project Management",
+      "year": 3,
+      "classifier_category": "IT Project Management",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["it project management", "project planning", "work breakdown structure", "critical path", "risk management", "project scheduling", "cost estimation", "stakeholder management"],
+      "aliases": ["CSC3612", "information technology project management"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3712",
+      "official_name": "Advanced Databases",
+      "year": 3,
+      "classifier_category": "Database Systems",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["advanced databases", "query optimization", "transaction processing", "concurrency control", "distributed databases", "database recovery", "nosql", "data warehousing"],
+      "aliases": ["CSC3712", "CSC 3712 advanced database systems"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005", "SRC006"]
+    },
+    {
+      "course_code": "CSC 3742",
+      "official_name": "Information and Network Security",
+      "year": 3,
+      "classifier_category": "Cybersecurity",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["information and network security", "cryptography", "network security", "access control", "authentication", "security threats", "malware", "security policy"],
+      "aliases": ["CSC3742", "information security and network security"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 3750",
+      "official_name": "Management Information Systems",
+      "year": 3,
+      "classifier_category": "Information Systems",
+      "legacy_stream_scope": ["unknown"],
+      "keywords": ["management information systems", "business information systems", "decision support systems", "enterprise systems", "business intelligence", "information strategy", "organizational systems"],
+      "aliases": ["CSC3750", "CSC 3750 MIS"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC007"]
+    },
+    {
+      "course_code": "CSC 3801",
+      "official_name": "Data Communications and Network",
+      "year": 3,
+      "classifier_category": "Computer Networks",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["data communications", "computer networks", "osi model", "tcp ip", "network protocols", "packet switching", "network topology", "error detection"],
+      "aliases": ["CSC3801", "data communications and networks"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4004",
+      "official_name": "Project",
+      "year": 4,
+      "classifier_category": "Research Project",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["final year project", "research project", "project proposal", "literature review", "research methodology", "system implementation", "project dissertation", "project defence"],
+      "aliases": ["CSC4004", "CSC 4004 project"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4035",
+      "official_name": "Web Programming and Technologies",
+      "year": 4,
+      "classifier_category": "Web Programming",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["web programming and technologies", "html", "css", "javascript", "web applications", "http", "server side programming", "rest api"],
+      "aliases": ["CSC4035", "web programming technologies"],
+      "verification_status": "confirmed_historical",
+      "source_ids": ["SRC002", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4130",
+      "official_name": "Advanced Hardware Design and Implementation",
+      "year": 4,
+      "classifier_category": "Hardware Design",
+      "legacy_stream_scope": ["computer_systems_engineering"],
+      "keywords": ["advanced hardware design", "hardware implementation", "digital system design", "microprocessors", "microcontrollers", "embedded systems", "hardware description language", "fpga"],
+      "aliases": ["CSC4130", "hardware design and implementation"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005", "SRC006"]
+    },
+    {
+      "course_code": "CSC 4505",
+      "official_name": "Graphics and Video Computing",
+      "year": 4,
+      "classifier_category": "Computer Graphics",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["graphics and video computing", "computer graphics", "rendering", "rasterization", "geometric transformations", "shading", "video processing", "computer animation"],
+      "aliases": ["CSC4505", "graphics and visual computing"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4630",
+      "official_name": "Advanced Software Engineering",
+      "year": 4,
+      "classifier_category": "Software Engineering",
+      "legacy_stream_scope": ["software_engineering"],
+      "keywords": ["advanced software engineering", "software architecture", "design patterns", "component based development", "software evolution", "enterprise software", "software process improvement"],
+      "aliases": ["CSC4630", "advanced software development"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005", "SRC006"]
+    },
+    {
+      "course_code": "CSC 4631",
+      "official_name": "Software Testing and Maintenance",
+      "year": 4,
+      "classifier_category": "Software Engineering",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["software testing and maintenance", "unit testing", "integration testing", "system testing", "test cases", "software maintenance", "regression testing", "code coverage"],
+      "aliases": ["CSC4631", "software test and maintenance"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4642",
+      "official_name": "Software Quality Assurance",
+      "year": 4,
+      "classifier_category": "Software Engineering",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["software quality assurance", "quality management", "software metrics", "quality standards", "process assessment", "verification and validation", "quality control", "capability maturity"],
+      "aliases": ["CSC4642", "SQA"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4722",
+      "official_name": "Distributed Systems",
+      "year": 4,
+      "classifier_category": "Distributed Systems",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["distributed systems", "distributed computing", "logical clocks", "consensus", "replication", "fault tolerance", "distributed transactions", "message passing"],
+      "aliases": ["CSC4722", "distributed computer systems"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005", "SRC006"]
+    },
+    {
+      "course_code": "CSC 4745",
+      "official_name": "Multimedia and Human Computer Interaction",
+      "year": 4,
+      "classifier_category": "Human-Computer Interaction",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["multimedia and human computer interaction", "human computer interaction", "user experience", "user interface design", "usability", "interaction design", "multimedia systems", "accessibility"],
+      "aliases": ["CSC4745", "multimedia and HCI"],
+      "verification_status": "confirmed_historical",
+      "source_ids": ["SRC002", "SRC005", "SRC006"]
+    },
+    {
+      "course_code": "CSC 4765",
+      "official_name": "IT Audit and Controls",
+      "year": 4,
+      "classifier_category": "IT Audit and Governance",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["it audit and controls", "information systems audit", "internal controls", "risk assessment", "audit evidence", "it governance", "compliance", "control objectives"],
+      "aliases": ["CSC4765", "information technology audit"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4792",
+      "official_name": "Data Mining and Warehousing",
+      "year": 4,
+      "classifier_category": "Data Mining",
+      "legacy_stream_scope": ["unknown"],
+      "keywords": ["data mining and warehousing", "knowledge discovery", "association rules", "frequent itemsets", "clustering", "data preprocessing", "classification techniques", "data warehouse"],
+      "aliases": ["CSC4792", "data mining and data warehousing"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003"]
+    },
+    {
+      "course_code": "CSC 4812",
+      "official_name": "Cloud and High-Performance Computing",
+      "year": 4,
+      "classifier_category": "Cloud Computing",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["cloud and high performance computing", "cloud computing", "virtualization", "cloud services", "containers", "distributed storage", "high performance computing", "scalable infrastructure"],
+      "aliases": ["CSC4812", "cloud and HPC"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4822",
+      "official_name": "Routing and Switching Technologies",
+      "year": 4,
+      "classifier_category": "Computer Networks",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["routing and switching technologies", "routing protocols", "network switching", "vlans", "subnetting", "ospf", "bgp", "router configuration"],
+      "aliases": ["CSC4822", "routing and switching"],
+      "verification_status": "confirmed_current",
+      "source_ids": ["SRC002", "SRC003", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4835",
+      "official_name": "Wireless and Mobile Networks",
+      "year": 4,
+      "classifier_category": "Computer Networks",
+      "legacy_stream_scope": ["software_engineering"],
+      "keywords": ["wireless and mobile networks", "wireless networks", "mobile networks", "wifi", "cellular networks", "wireless protocols", "mobility management", "radio access"],
+      "aliases": ["CSC4835", "mobile and wireless networks"],
+      "verification_status": "corroborated_current",
+      "source_ids": ["SRC004", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4845",
+      "official_name": "Fundamentals of Grid and Cluster Computing",
+      "year": 4,
+      "classifier_category": "Parallel Computing",
+      "legacy_stream_scope": ["software_engineering", "computer_systems_engineering"],
+      "keywords": ["grid and cluster computing", "cluster computing", "grid computing", "parallel computing", "distributed workloads", "job scheduling", "message passing interface", "compute cluster"],
+      "aliases": ["CSC4845", "fundamentals of cluster computing"],
+      "verification_status": "confirmed_historical",
+      "source_ids": ["SRC002", "SRC005"]
+    },
+    {
+      "course_code": "CSC 4921",
+      "official_name": "Numerical Analysis I",
+      "year": 4,
+      "classifier_category": "Numerical Computing",
+      "legacy_stream_scope": ["computer_systems_engineering"],
+      "keywords": ["numerical analysis one", "numerical methods", "approximation error", "nonlinear equations", "matrix factorization", "interpolation", "ordinary differential equations"],
+      "aliases": ["CSC4921", "CSC 4921 numerical analysis"],
+      "verification_status": "secondary_source_only",
+      "source_ids": ["SRC005", "SRC006"]
+    }
+  ]
+}

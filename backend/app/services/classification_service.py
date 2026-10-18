@@ -1,7 +1,9 @@
+import json
 import math
 import os
 import re
 from collections import Counter
+from pathlib import Path
 
 
 ALLOWED_EXTENSIONS = {
@@ -59,6 +61,38 @@ COURSE_CODES = {
     "csc 4792": "Data Mining",
 }
 
+
+def _load_unza_taxonomy() -> None:
+    """Merge curriculum evidence into the generic subject profiles.
+
+    The JSON file remains the single editable source for UNZA course aliases and
+    codes. The generic profiles stay available for documents that do not contain
+    a course code or exact course title.
+    """
+    taxonomy_path = Path(__file__).resolve().parents[2] / "data" / "unza_cs_taxonomy.json"
+    try:
+        taxonomy = json.loads(taxonomy_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        return
+
+    for course in taxonomy.get("courses", []):
+        category = course.get("classifier_category")
+        course_code = course.get("course_code", "").lower().strip()
+        official_name = course.get("official_name", "").lower().strip()
+        if not category or not course_code or not official_name:
+            continue
+
+        terms = CATEGORY_PROFILES.setdefault(category, [])
+        terms.extend([official_name, *course.get("aliases", []), *course.get("keywords", [])])
+        CATEGORY_PROFILES[category] = list(dict.fromkeys(term.lower().strip() for term in terms if term))
+
+        compact_code = re.sub(r"[^a-z0-9]", "", course_code)
+        COURSE_CODES[course_code] = category
+        COURSE_CODES[compact_code] = category
+
+
+_load_unza_taxonomy()
+
 TOKEN_PATTERN = re.compile(r"[a-z][a-z0-9+#.-]{1,}")
 
 
@@ -111,9 +145,16 @@ def classify_document(filename: str, pages: list[dict]) -> dict:
         headings.extend(line.strip() for line in page.get("text", "").splitlines()[:3] if line.strip())
     heading_text = " ".join(headings).lower()
     content_text = " ".join(page.get("text", "") for page in pages).lower()
+    normalized_code_text = re.sub(
+        r"[^a-z0-9]", "", f"{filename_text} {content_text[:3000]}"
+    )
 
     code_category = next(
-        (category for code, category in COURSE_CODES.items() if code in filename_text or code in content_text[:3000]),
+        (
+            category
+            for code, category in COURSE_CODES.items()
+            if re.sub(r"[^a-z0-9]", "", code) in normalized_code_text
+        ),
         None,
     )
     profile_documents = [" ".join(terms) for terms in CATEGORY_PROFILES.values()]
