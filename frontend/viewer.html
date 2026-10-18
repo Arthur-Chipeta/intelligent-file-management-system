@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document viewer | Intelligent Digital Library</title>
+    <link rel="stylesheet" href="style.css?v=10" />
+  </head>
+  <body class="viewer-page">
+    <header class="viewer-page-header">
+      <a class="viewer-back-link" href="index.html" aria-label="Return to the library">← Library</a>
+      <div class="viewer-title-block">
+        <span class="viewer-eyebrow">Document viewer</span>
+        <h1 id="viewerPageTitle">Opening document…</h1>
+        <div class="viewer-title-meta">
+          <span class="tag" id="viewerCategory">Loading</span>
+          <span id="viewerFileMeta"></span>
+        </div>
+      </div>
+      <div class="viewer-page-actions">
+        <button class="secondary" id="renameButton" type="button" hidden>Rename</button>
+        <a class="secondary viewer-action" id="openOriginalButton" target="_blank" rel="noopener noreferrer" hidden>Open original</a>
+        <button class="primary" id="downloadButton" type="button" hidden>Download</button>
+      </div>
+    </header>
+
+    <main class="viewer-page-layout">
+      <aside class="viewer-sidebar" aria-label="Document information">
+        <section>
+          <h2>Related topics</h2>
+          <p class="viewer-help">Select a topic to jump to its first matching page or slide.</p>
+          <div class="topic-list" id="viewerTopics"></div>
+          <form class="topic-form" id="topicForm">
+            <label class="sr-only" for="newTopic">Add a topic label</label>
+            <input class="form-input" id="newTopic" maxlength="100" placeholder="Add a label" required />
+            <button class="secondary" type="submit">Add</button>
+          </form>
+          <div class="notice" id="topicNotice" aria-live="polite"></div>
+        </section>
+        <section class="viewer-details">
+          <h2>Details</h2>
+          <dl>
+            <div><dt>Type</dt><dd id="viewerType">—</dd></div>
+            <div><dt>Added</dt><dd id="viewerDate">—</dd></div>
+            <div><dt>Size</dt><dd id="viewerSize">—</dd></div>
+          </dl>
+        </section>
+      </aside>
+
+      <section class="viewer-stage" id="viewerStage" aria-live="polite">
+        <div class="viewer-status" id="viewerLoading">
+          <span class="viewer-spinner" aria-hidden="true"></span>
+          <strong>Opening your document…</strong>
+          <p>The preview will appear here.</p>
+        </div>
+        <iframe id="documentFrame" title="PDF document viewer" src="about:blank" hidden></iframe>
+        <img id="imageViewer" alt="" hidden />
+        <video id="videoViewer" controls hidden></video>
+        <div class="text-viewer" id="textViewer" hidden></div>
+        <div class="viewer-status viewer-error" id="viewerError" hidden>
+          <strong>Preview unavailable</strong>
+          <p id="viewerErrorMessage">This resource could not be opened.</p>
+          <a class="secondary viewer-action" href="index.html">Return to library</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="viewerRenameModal">
+      <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="viewerRenameTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="viewerRenameTitle">Rename resource</h2>
+            <p>Choose the name shown in your library.</p>
+          </div>
+          <button class="close" id="closeViewerRename" type="button" aria-label="Close rename resource form">×</button>
+        </div>
+        <form id="viewerRenameForm">
+          <label class="form-label" for="viewerResourceName">Resource name</label>
+          <input class="form-input" id="viewerResourceName" maxlength="255" required />
+          <div class="notice" id="viewerRenameNotice" aria-live="polite"></div>
+          <div class="modal-actions">
+            <button class="secondary" id="cancelViewerRename" type="button">Cancel</button>
+            <button class="primary" id="saveViewerRename" type="submit">Save name</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="viewer.js?v=2"></script>
+  </body>
+</html>

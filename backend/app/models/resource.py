@@ -92,6 +92,10 @@ class CategoryCorrectionRequest(BaseModel):
     category: str = Field(min_length=2, max_length=100)
 
 
+class ResourceRenameRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
 class ResourceResponse(BaseModel):
     id: int
     name: str
@@ -109,3 +113,13 @@ class ResourceResponse(BaseModel):
     folder_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ResourcePageResponse(BaseModel):
+    page: int
+    text: str
+
+
+class ResourceViewerResponse(BaseModel):
+    resource: ResourceResponse
+    pages: list[ResourcePageResponse] = Field(default_factory=list)

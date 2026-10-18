@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Intelligent Digital Library | File Manager</title>
-    <link rel="stylesheet" href="style.css?v=8" />
+    <link rel="stylesheet" href="style.css?v=10" />
   </head>
   <body>
     <section class="auth-shell" id="authShell">
@@ -331,6 +331,26 @@
         </div>
       </div>
     </div>
+    <div class="modal-backdrop" id="renameResourceModal">
+      <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="renameResourceTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="renameResourceTitle">Rename resource</h2>
+            <p id="renameResourceDescription">Choose the name shown in your library.</p>
+          </div>
+          <button class="close" data-close="renameResourceModal" aria-label="Close rename resource form">×</button>
+        </div>
+        <form id="renameResourceForm">
+          <label class="form-label" for="resourceName">Resource name</label>
+          <input class="form-input" id="resourceName" maxlength="255" required />
+          <div class="notice" id="renameResourceNotice" aria-live="polite"></div>
+          <div class="modal-actions">
+            <button class="secondary" type="button" data-close="renameResourceModal">Cancel</button>
+            <button class="primary" id="renameResourceSubmit" type="submit">Save name</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <div class="modal-backdrop" id="categoryModal">
       <div class="modal category-modal" role="dialog" aria-modal="true" aria-labelledby="categoryTitle">
         <div class="modal-header">
@@ -367,26 +387,6 @@
         </form>
       </div>
     </div>
-    <div class="modal-backdrop viewer-backdrop" id="viewerModal">
-      <div class="modal viewer-modal" role="dialog" aria-modal="true" aria-labelledby="viewerTitle">
-        <div class="modal-header viewer-header">
-          <div>
-            <h2 id="viewerTitle">Document</h2>
-            <span class="tag" id="viewerCategory">General</span>
-          </div>
-          <button class="close" data-close="viewerModal" aria-label="Close document viewer">×</button>
-        </div>
-        <div class="topic-panel">
-          <div><strong>Related topics</strong><small> Select a label to jump to its first matching page.</small></div>
-          <div class="topic-list" id="viewerTopics"></div>
-          <form class="topic-form" id="topicForm">
-            <input class="form-input" id="newTopic" maxlength="100" placeholder="Add a label" required />
-            <button class="secondary" type="submit">Add</button>
-          </form>
-        </div>
-        <iframe id="pdfViewer" title="PDF document viewer" src="about:blank"></iframe>
-      </div>
-    </div>
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=10"></script>
   </body>
 </html>

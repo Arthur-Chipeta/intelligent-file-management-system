@@ -156,6 +156,18 @@ def test_resource_is_persisted_listed_served_and_deleted():
     stored_file = client.get(f"/resources/{resource_id}/file", headers=headers)
     assert stored_file.status_code == 200
     assert stored_file.content == b"fake-png-content"
+    assert stored_file.headers["content-disposition"].startswith("inline;")
+
+    viewer = client.get(f"/resources/{resource_id}/viewer", headers=headers)
+    assert viewer.status_code == 200
+    assert viewer.json()["resource"]["id"] == resource_id
+    assert viewer.json()["resource"]["name"] == "diagram.png"
+    assert viewer.json()["pages"] == []
+
+    download = client.get(f"/resources/{resource_id}/download", headers=headers)
+    assert download.status_code == 200
+    assert download.content == b"fake-png-content"
+    assert download.headers["content-disposition"].startswith("attachment;")
 
     deleted = client.delete(f"/resources/{resource_id}", headers=headers)
     assert deleted.status_code == 204
@@ -176,7 +188,81 @@ def test_users_cannot_access_each_others_resources():
     other_headers = {"Authorization": f"Bearer {token_for('other@example.com')}"}
     assert client.get(f"/resources/{resource_id}", headers=other_headers).status_code == 404
     assert client.get(f"/resources/{resource_id}/file", headers=other_headers).status_code == 404
+    assert client.get(f"/resources/{resource_id}/viewer", headers=other_headers).status_code == 404
+    assert client.get(f"/resources/{resource_id}/download", headers=other_headers).status_code == 404
     assert client.delete(f"/resources/{resource_id}", headers=other_headers).status_code == 404
+
+
+def test_resources_can_be_renamed_and_empty_names_are_rejected():
+    register()
+    headers = {"Authorization": f"Bearer {token_for()}"}
+    resource_id = client.post(
+        "/resources",
+        headers=headers,
+        files={"file": ("original.png", b"image", "image/png")},
+    ).json()["id"]
+
+    renamed = client.patch(
+        f"/resources/{resource_id}/name",
+        headers=headers,
+        json={"name": "  Web Development Tutorial  "},
+    )
+    assert renamed.status_code == 200
+    assert renamed.json()["name"] == "Web Development Tutorial.png"
+    assert client.get(f"/resources/{resource_id}", headers=headers).json()["name"] == "Web Development Tutorial.png"
+
+    invalid = client.patch(
+        f"/resources/{resource_id}/name", headers=headers, json={"name": "   "}
+    )
+    assert invalid.status_code == 422
+
+
+def test_webpage_title_is_used_and_can_be_renamed(monkeypatch):
+    monkeypatch.setattr(
+        "app.api.upload.extract_webpage_content",
+        lambda url: {
+            "url": url,
+            "domain": "youtube.com",
+            "title": "Learn HTML for Beginners - W3Schools.com",
+            "text": "HTML elements, attributes, forms and tables",
+        },
+    )
+    register()
+    headers = {"Authorization": f"Bearer {token_for()}"}
+    uploaded = client.post(
+        "/resources/webpage",
+        headers=headers,
+        json={"url": "https://www.youtube.com/watch?v=it1rTvBcfRg"},
+    )
+    assert uploaded.status_code == 201
+    assert uploaded.json()["name"] == "Learn HTML for Beginners - W3Schools.com"
+
+    renamed = client.patch(
+        f"/resources/{uploaded.json()['id']}/name",
+        headers=headers,
+        json={"name": "My HTML lesson"},
+    )
+    assert renamed.status_code == 200
+    assert renamed.json()["name"] == "My HTML lesson"
+
+
+def test_users_cannot_rename_each_others_resources():
+    register()
+    owner_headers = {"Authorization": f"Bearer {token_for()}"}
+    resource_id = client.post(
+        "/resources",
+        headers=owner_headers,
+        files={"file": ("private.png", b"image", "image/png")},
+    ).json()["id"]
+
+    register(email="other@example.com")
+    other_headers = {"Authorization": f"Bearer {token_for('other@example.com')}"}
+    response = client.patch(
+        f"/resources/{resource_id}/name",
+        headers=other_headers,
+        json={"name": "Not mine"},
+    )
+    assert response.status_code == 404
 
 
 def test_topic_extraction_returns_confidence_and_page_references():

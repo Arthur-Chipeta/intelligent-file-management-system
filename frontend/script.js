@@ -4,8 +4,7 @@ let accessToken = localStorage.getItem(TOKEN_STORAGE_KEY);
 let authMode = "login";
 let resources = [];
 let resourceToDelete = null;
-let viewerObjectUrl = null;
-let currentViewedResource = null;
+let resourceBeingRenamed = null;
 let currentCategoryResource = null;
 let availableCategories = [];
 let currentFolderId = null;
@@ -314,7 +313,10 @@ function resourceRowMarkup(resource) {
         ${escapeHtml(resource.category)}${resource.category_confidence ? ` · ${Math.round(resource.category_confidence * 100)}%` : ""}
       </button>${resource.category_review_required ? '<small class="review-flag">Review suggested</small>' : ""}</td>
       <td>${escapeHtml(resource.date)}</td><td class="type">${escapeHtml(resource.type.replace("_", " "))}</td>
-      <td><button class="delete-resource" data-id="${resource.id}" aria-label="Delete ${escapeHtml(resource.name)}">⌫</button></td>
+      <td><div class="resource-actions">
+        <button class="rename-resource" data-id="${resource.id}" aria-label="Rename ${escapeHtml(resource.name)}" title="Rename">✎</button>
+        <button class="delete-resource" data-id="${resource.id}" aria-label="Delete ${escapeHtml(resource.name)}" title="Delete">⌫</button>
+      </div></td>
     </tr>`;
 }
 
@@ -390,10 +392,6 @@ function openModal(id) { document.getElementById(id).classList.add("open"); }
 function closeModal(id) {
     if (id === "uploadModal" && uploadInProgress) return;
     document.getElementById(id).classList.remove("open");
-    if (id === "viewerModal") {
-        document.getElementById("pdfViewer").src = "about:blank";
-        currentViewedResource = null;
-    }
     if (id === "uploadModal") resetFileSelection();
 }
 
@@ -450,6 +448,21 @@ document.addEventListener("click", closeNotifications);
 [search, categoryFilter, typeFilter].forEach((element) => element.addEventListener("input", renderResources));
 
 function handleResourceClick(event) {
+    const renameButton = event.target.closest(".rename-resource");
+    if (renameButton) {
+        resourceBeingRenamed = [...resources, ...libraryResources].find(
+            (resource) => resource.id === Number(renameButton.dataset.id),
+        );
+        if (!resourceBeingRenamed) return;
+        document.getElementById("resourceName").value = resourceBeingRenamed.name;
+        document.getElementById("renameResourceDescription").textContent =
+            resourceBeingRenamed.type === "WEBPAGE_LINK"
+                ? "Choose the title shown for this saved link."
+                : "Choose the name shown in your library.";
+        notice("renameResourceNotice", "", "");
+        openModal("renameResourceModal");
+        return;
+    }
     const categoryButton = event.target.closest(".edit-category");
     if (categoryButton) return openCategoryEditor(Number(categoryButton.dataset.id));
     const openButton = event.target.closest(".open-resource");
@@ -464,6 +477,30 @@ function handleResourceClick(event) {
 
 rows.addEventListener("click", handleResourceClick);
 document.getElementById("libraryResourceRows").addEventListener("click", handleResourceClick);
+
+document.getElementById("renameResourceForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!resourceBeingRenamed) return;
+    const submit = document.getElementById("renameResourceSubmit");
+    submit.disabled = true;
+    try {
+        const response = await fetch(API_BASE_URL + `/resources/${resourceBeingRenamed.id}/name`, {
+            method: "PATCH",
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ name: document.getElementById("resourceName").value }),
+        });
+        if (response.status === 401) return showAuthentication();
+        const data = await response.json();
+        if (!response.ok) return notice("renameResourceNotice", formatApiError(data), "error");
+        replaceResource(data);
+        resourceBeingRenamed = null;
+        closeModal("renameResourceModal");
+    } catch (error) {
+        notice("renameResourceNotice", error.message || "The resource could not be renamed.", "error");
+    } finally {
+        submit.disabled = false;
+    }
+});
 
 async function openCategoryEditor(resourceId) {
     currentCategoryResource = resources.find((resource) => resource.id === resourceId);
@@ -497,7 +534,6 @@ function replaceResource(updated) {
     resources = resources.map((resource) => resource.id === normalized.id ? normalized : resource);
     libraryResources = libraryResources.map((resource) => resource.id === normalized.id ? normalized : resource);
     currentCategoryResource = normalized;
-    if (currentViewedResource?.id === normalized.id) currentViewedResource = normalized;
     renderResources();
     renderDashboard();
     document.getElementById("libraryResourceRows").innerHTML = libraryResources.map(resourceRowMarkup).join("");
@@ -555,80 +591,11 @@ document.getElementById("confirmDelete").onclick = async () => {
     }
 };
 
-async function openResource(resourceId) {
-    const resource = resources.find((item) => item.id === resourceId);
-    if (!resource) return;
-    if (resource.external_url) return window.open(resource.external_url, "_blank", "noopener,noreferrer");
-    try {
-        const response = await fetch(API_BASE_URL + `/resources/${resourceId}/file`, { headers: authHeaders() });
-        if (response.status === 401) return showAuthentication();
-        if (!response.ok) throw new Error("The document could not be opened.");
-        if (viewerObjectUrl) URL.revokeObjectURL(viewerObjectUrl);
-        viewerObjectUrl = URL.createObjectURL(await response.blob());
-        if (resource.type !== "PDF") return window.open(viewerObjectUrl, "_blank", "noopener,noreferrer");
-        currentViewedResource = resource;
-        document.getElementById("viewerTitle").textContent = resource.name;
-        document.getElementById("viewerCategory").textContent = resource.category;
-        renderViewerTopics();
-        document.getElementById("pdfViewer").src = viewerObjectUrl;
-        openModal("viewerModal");
-    } catch (error) {
-        alert(error.message);
-    }
+function openResource(resourceId) {
+    const viewerUrl = new URL("viewer.html", window.location.href);
+    viewerUrl.searchParams.set("id", resourceId);
+    window.open(viewerUrl.toString(), "_blank", "noopener,noreferrer");
 }
-
-function renderViewerTopics() {
-    const topicList = document.getElementById("viewerTopics");
-    if (!currentViewedResource || !currentViewedResource.topics.length) {
-        topicList.innerHTML = '<span class="topic-empty">No topics detected. Add one below.</span>';
-        return;
-    }
-    topicList.innerHTML = currentViewedResource.topics.map((topic) => {
-        const pageText = topic.pages.length ? ` · p. ${topic.pages.join(", ")}` : "";
-        return `<span class="topic-chip">
-          <button type="button" class="topic-jump" data-page="${topic.pages[0] || ""}" title="${Math.round(topic.confidence * 100)}% confidence">${escapeHtml(topic.name)}${pageText}</button>
-          <button type="button" class="topic-remove" data-id="${topic.id}" aria-label="Remove ${escapeHtml(topic.name)}">×</button>
-        </span>`;
-    }).join("");
-}
-
-document.getElementById("viewerTopics").addEventListener("click", async (event) => {
-    const jump = event.target.closest(".topic-jump");
-    if (jump && jump.dataset.page) {
-        document.getElementById("pdfViewer").src = viewerObjectUrl + "#page=" + jump.dataset.page;
-        return;
-    }
-    const remove = event.target.closest(".topic-remove");
-    if (!remove || !currentViewedResource) return;
-    const response = await fetch(
-        API_BASE_URL + `/resources/${currentViewedResource.id}/topics/${remove.dataset.id}`,
-        { method: "DELETE", headers: authHeaders() },
-    );
-    if (response.ok) {
-        currentViewedResource.topics = currentViewedResource.topics.filter(
-            (topic) => topic.id !== Number(remove.dataset.id),
-        );
-        renderViewerTopics();
-        renderResources();
-    }
-});
-
-document.getElementById("topicForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!currentViewedResource) return;
-    const input = document.getElementById("newTopic");
-    const response = await fetch(API_BASE_URL + `/resources/${currentViewedResource.id}/topics`, {
-        method: "POST",
-        headers: authHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ name: input.value.trim(), pages: [] }),
-    });
-    const data = await response.json();
-    if (!response.ok) return alert(formatApiError(data));
-    currentViewedResource.topics.push(data);
-    input.value = "";
-    renderViewerTopics();
-    renderResources();
-});
 
 const fileInput = document.getElementById("resourceFile");
 const dropzone = document.querySelector(".dropzone");

@@ -18,6 +18,8 @@ from app.models.resource import (
     ManualTopicRequest,
     Resource,
     ResourceCategoryPrediction,
+    ResourceRenameRequest,
+    ResourceViewerResponse,
     ResourceResponse,
     ResourceTopic,
     TopicResponse,
@@ -154,6 +156,40 @@ def get_resource(
     return serialize_resource(owned_resource(resource_id, current_user, db))
 
 
+@router.get("/resources/{resource_id}/viewer", response_model=ResourceViewerResponse)
+def get_resource_viewer(
+    resource_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    resource = owned_resource(resource_id, current_user, db)
+    return {
+        "resource": serialize_resource(resource),
+        "pages": resource_pages(resource),
+    }
+
+
+@router.patch("/resources/{resource_id}/name", response_model=ResourceResponse)
+def rename_resource(
+    resource_id: int,
+    payload: ResourceRenameRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    resource = owned_resource(resource_id, current_user, db)
+    name = " ".join(payload.name.split())
+    if not name:
+        raise HTTPException(status_code=422, detail="Resource name cannot be empty.")
+    if resource.stored_filename:
+        original_suffix = Path(resource.stored_filename).suffix
+        if original_suffix and not name.lower().endswith(original_suffix.lower()):
+            name += original_suffix
+    resource.name = name
+    db.commit()
+    db.refresh(resource)
+    return serialize_resource(resource)
+
+
 @router.patch("/resources/{resource_id}/category", response_model=ResourceResponse)
 def correct_resource_category(
     resource_id: int,
@@ -209,12 +245,34 @@ def get_resource_file(
         content = download_object(resource.stored_filename)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Stored file not found.")
-    media_type = mimetypes.guess_type(resource.name)[0] or "application/octet-stream"
+    media_type = mimetypes.guess_type(resource.stored_filename)[0] or "application/octet-stream"
     encoded_name = quote(resource.name)
     return Response(
         content=content,
         media_type=media_type,
         headers={"Content-Disposition": f"inline; filename*=UTF-8''{encoded_name}"},
+    )
+
+
+@router.get("/resources/{resource_id}/download")
+def download_resource_file(
+    resource_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    resource = owned_resource(resource_id, current_user, db)
+    if not resource.stored_filename:
+        raise HTTPException(status_code=404, detail="This resource has no stored file.")
+    try:
+        content = download_object(resource.stored_filename)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Stored file not found.")
+    media_type = mimetypes.guess_type(resource.stored_filename)[0] or "application/octet-stream"
+    encoded_name = quote(resource.name)
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{encoded_name}"},
     )
 
 
